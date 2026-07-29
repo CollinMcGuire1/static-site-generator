@@ -1,18 +1,17 @@
 import unittest
 #from textnode import TextNode, TextType
-from htmlnode import HTMLNode, LeafNode
-
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
 class TestHTMLNode(unittest.TestCase):
     def test_eq(self):
         tag = "this is a tag"
-        tag2 = "this is a tag"      # this should be the same as "tag" for the test_eq to be true
+        tag2 = "this is a tag" # this should be the same as "tag" for the test_eq to be true
         value = "this is a value"
         children = ["this", "is", "a", "list", "of", "children"]
         props = {
-            "this is a key": "this is the value of 'this is a key'",
-            "this is 2 key": "this is 2 value",
-            "this is 3 key": "this is 3 value",
+        "this is a key": "this is the value of 'this is a key'",
+        "this is 2 key": "this is 2 value",
+        "this is 3 key": "this is 3 value",
         }
 
         node = HTMLNode(tag, value, children, props)
@@ -83,3 +82,48 @@ class TestHTMLNode(unittest.TestCase):
         node = LeafNode("p", None)
         with self.assertRaises(ValueError):
             node.to_html()
+
+    def test_parent_to_html_with_child(self):
+        child_node = LeafNode("span", "child")
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(parent_node.to_html(), "<div><span>child</span></div>")
+
+    def test_parent_many_children(self):
+        parent = ParentNode("div", [
+            LeafNode("b", "bold"),
+            LeafNode(None, "normal"),
+            LeafNode("i", "italic"),
+        ])
+        self.assertEqual(parent.to_html(), "<div><b>bold</b>normal<i>italic</i></div>")
+
+
+    def test_to_html_with_grandchildren(self):
+        grandchild_node = LeafNode("b", "grandchild")
+        child_node = ParentNode("span", [grandchild_node])
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(
+            parent_node.to_html(),
+            "<div><span><b>grandchild</b></span></div>",
+        )
+
+    def test_parent_to_html_with_no_children(self):
+        parent = ParentNode("b", None)      # "b" is the tag, and None is showing no existing children. Props is an optional Arg, and is left out in this case.
+        with self.assertRaises(ValueError) as context:
+            parent.to_html()
+        self.assertEqual(str(context.exception), "parent node is missing children")
+
+    #def test_parent_to_html_with_empty_child_list(self):                       # this test is assuming that an empty child list is the same as having None children, which may not be the case.
+    #    parent = ParentNode("b", [])        # child list is empty, not None
+    #    with self.assertRaises(ValueError) as context:
+    #        parent.to_html()
+    #    self.assertEqual(str(context.exception), "child node is an empty diclistt")
+
+    def test_to_html_no_tag(self):
+        parent = ParentNode(None, [LeafNode("span", "child")])  # tag missing, contains a child node
+        with self.assertRaises(ValueError) as context:
+            parent.to_html()
+        self.assertEqual(str(context.exception), "parent node missing a tag")
+
+    def test_to_html_with_props(self):
+        parent = ParentNode("a", [LeafNode(None, "click me")], {"href": "https://boot.dev"})
+        self.assertEqual(parent.to_html(), '<a href="https://boot.dev">click me</a>')

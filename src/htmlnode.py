@@ -37,11 +37,11 @@ class HTMLNode:
 
 class LeafNode(HTMLNode):
     def __init__(self, tag, value, props=None):
-        super(LeafNode, self,).__init__(tag, value, children=None, props=props)
+        super(LeafNode, self).__init__(tag, value, children=None, props=props)
 
     def to_html(self):
         if self.value is None:
-            raise ValueError        # all nodes MUST have a value
+            raise ValueError("leaf node missing a value")      # all leaf nodes MUST have a value
         if self.tag == None:
             return self.value
         else:
@@ -52,3 +52,24 @@ class LeafNode(HTMLNode):
         value = "Value:"
         props = "Props:"
         return f"{tag:<12}{self.tag}\n{value:<12}{self.value}\n{props:<12}{self.props}"
+
+class ParentNode(HTMLNode):
+    def __init__(self, tag, children, props=None):
+        super().__init__(tag, None, children, props=props)
+
+    def to_html(self):
+        if self.tag is None:
+            raise ValueError("parent node missing a tag")       # all parent nodes MUST have a tag
+        if self.children is None:
+            raise ValueError("parent node is missing children")
+        #if self.children == []:                                # this is making an assumption that an empty child list is the same as having None children, which may not be accurate.
+        #    raise ValueError("child node is an empty dict")
+        else:
+            opening = f"<{self.tag}{self.props_to_html()}>"
+            middle = ""
+            for child in self.children:
+                middle += child.to_html()
+
+            closing = f"</{self.tag}>"
+            
+            return opening + middle + closing
