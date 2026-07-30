@@ -127,3 +127,8 @@ class TestHTMLNode(unittest.TestCase):
     def test_to_html_with_props(self):
         parent = ParentNode("a", [LeafNode(None, "click me")], {"href": "https://boot.dev"})
         self.assertEqual(parent.to_html(), '<a href="https://boot.dev">click me</a>')
+
+
+
+if __name__ == "__main__":
+    unittest.main()
