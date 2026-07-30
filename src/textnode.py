@@ -1,4 +1,5 @@
 from enum import Enum
+from htmlnode import LeafNode, ParentNode, HTMLNode
 
 class TextType(Enum):
     TEXT = "text"
@@ -18,3 +19,7 @@ class TextNode:
         return (self.text == other.text and self.text_type == other.text_type and self.url == other.url)
     def __repr__(self):
         return (f"TextNode({self.text}, {self.text_type.value}, {self.url})")
+
+def text_node_to_html_node(text_node: TextNode) -> LeafNode:
+    if text_node.text_type not in TextType:
+        raise Exception
