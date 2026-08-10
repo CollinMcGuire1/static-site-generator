@@ -1,5 +1,5 @@
 import unittest
-from inline_markdown import split_nodes_delimiter, extract_markdown_images, extract_markdown_links, split_nodes_image, split_nodes_link
+from inline_markdown import split_nodes_delimiter, extract_markdown_images, extract_markdown_links, split_nodes_image, split_nodes_link, text_to_textnodes
 from textnode import TextNode, TextType
 
 class TestInlineMarkdown(unittest.TestCase):
@@ -266,10 +266,81 @@ class TestInlineMarkdown(unittest.TestCase):
         new_nodes = split_nodes_link([node])
         # Tests that back-to-back links with no text between them work correctly
 
+    def test_text_to_textnodes(self):
+        node = "This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+        new_nodes = text_to_textnodes(node)
+        self.assertListEqual(
+            [TextNode("This is ", TextType.TEXT),
+             TextNode("text", TextType.BOLD),
+             TextNode(" with an ", TextType.TEXT),
+             TextNode("italic", TextType.ITALIC),
+             TextNode(" word and a ", TextType.TEXT),
+             TextNode("code block", TextType.CODE),
+             TextNode(" and an ", TextType.TEXT),
+             TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+             TextNode(" and a ", TextType.TEXT),
+             TextNode("link", TextType.LINK, "https://boot.dev"),
+             ],
+             new_nodes
+        )
 
+    def test_plain_text_to_md(self):
+        node = "this is plain text"
+        new_node = text_to_textnodes(node)
+        self.assertListEqual([TextNode("this is plain text", TextType.TEXT)], new_node)
 
+    def test_bold_multiple_times_to_md(self):
+        node = "this is **bold text** that is being **used more than one time** in a longer string of **words**"
+        new_nodes = text_to_textnodes(node)
+        self.assertListEqual(
+            [TextNode("this is ", TextType.TEXT),
+             TextNode("bold text", TextType.BOLD),
+             TextNode(" that is being ", TextType.TEXT),
+             TextNode("used more than one time", TextType.BOLD),
+             TextNode(" in a longer string of ", TextType.TEXT),
+             TextNode("words", TextType.BOLD)
+             ],
+             new_nodes
+        )
 
+    def test_starting_ending_delim_to_md(self):
+        node = "_this is text_ that starts and ends with `deliminators`"
+        new_nodes = text_to_textnodes(node)
+        self.assertListEqual(
+            [TextNode("this is text", TextType.ITALIC),
+             TextNode(" that starts and ends with ",TextType.TEXT),
+             TextNode("deliminators", TextType.CODE)
+             ],
+             new_nodes
+        )
 
+    def test_text_image_link_image(self):
+        node = "This is text before a ![first image](https://example.com/img1.png) then more text and a [cool link](https://example.com) followed by even more text and another ![second image](https://example.com/img2.png)"
+        new_nodes = text_to_textnodes(node)
+        self.assertListEqual(
+            [
+                TextNode("This is text before a ", TextType.TEXT),
+                TextNode("first image", TextType.IMAGE, "https://example.com/img1.png"),
+                TextNode(" then more text and a ", TextType.TEXT),
+                TextNode("cool link", TextType.LINK, "https://example.com"),
+                TextNode(" followed by even more text and another ", TextType.TEXT),
+                TextNode("second image", TextType.IMAGE, "https://example.com/img2.png"),
+            ],
+            new_nodes,
+        )
+
+    def test_unmatched_delimiter(self):
+        node = "This has an **unclosed bold section*"
+        with self.assertRaises(ValueError):
+            text_to_textnodes(node)
+
+    def test_unclosed_link(self):
+        node = "This has a [broken link(https://example.com)"
+        new_nodes = text_to_textnodes(node)
+        self.assertListEqual(
+            [TextNode("This has a [broken link(https://example.com)", TextType.TEXT)],
+            new_nodes,
+        )
 
 if __name__ == "__main__":
     unittest.main()        
