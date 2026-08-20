@@ -9,9 +9,9 @@ case "$1" in
 esac
 
 # Run local-only setup if it exists (in this case, it disables IPv6, which is erronously being used while Tailscale is active, causing timeout failures with Bootdev servers)
-if [ -f "./local_setup.sh" ]; then
-    source ./local_setup.sh
-fi
+#if [ -f "./local_setup.sh" ]; then
+#    source ./local_setup.sh
+#fi
 
 
 python3 src/main.py
