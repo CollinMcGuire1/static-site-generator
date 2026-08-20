@@ -128,17 +128,3 @@ img {
 ::-webkit-scrollbar-corner {
   background: #1f1c25;
 }
-
-/* Easter egg link styling */
-a[href$="easteregg.gif"] {
-  color: inherit;
-  border-bottom: none;
-  cursor: default;
-  opacity: 0.2; /* Makes it subtly visible; set to 0 or match #1f1c25 for 100% invisible */
-}
-
-a[href$="easteregg.gif"]:hover {
-  color: inherit;
-  border-color: transparent;
-  opacity: 0.6; /* Slightly reveals itself when hovered */
-}

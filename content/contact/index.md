@@ -3,7 +3,7 @@
 [< Back Home](/)
 
 Give me a call anytime to chat about Tolkien!
-
+[.](/images/easteregg.gif)
 `555-555-5555`
 
 **"Váya márië."**
